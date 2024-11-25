@@ -1,3 +1,3 @@
-// run `node index.js` in the terminal
+// run `npm start` in the terminal
 
 console.log(`Hello Node.js v${process.versions.node}!`);
