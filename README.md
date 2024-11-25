@@ -50,6 +50,10 @@ This bot is designed to automatically mention a user in a specific channel when 
     npm start
     ```
 
+## 🩷 Thanks to her!
+
+Thanks to my girlfriend for encouraging me to finish this project.
+
 
 ## 🛡️ Required Permissions
 
