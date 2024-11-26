@@ -5,7 +5,11 @@ This bot is designed to automatically mention a user in a specific channel when 
 ## 🎮 Slash Commands
 
 -   **`/setchannel`**  
-    Set the current channel as the ghost ping channel.
+    Show the panel to configure the ghostping."
+-   **`/ping`**  
+    Show the ping of your bot.
+-   **`/help`**  
+    Show the help page.
     
 
 ----------
