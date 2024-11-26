@@ -1,9 +1,15 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { 
+  SlashCommandBuilder, 
+  PermissionFlagsBits,
+  EmbedBuilder,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+  ComponentType
+} from 'discord.js';
 
 export const setChannelCommand = new SlashCommandBuilder()
   .setName('setchannel')
-  .setDescription('Configure ghost ping channels')
+  .setDescription('👻・Configure welcome ghost ping channels')
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export async function executeSetChannel(interaction, ghostChannels) {
@@ -15,40 +21,92 @@ export async function executeSetChannel(interaction, ghostChannels) {
     return;
   }
 
-  const colors = ['#FF69B4', '#FF4500', '#1E90FF', '#32CD32', '#FFD700'];
-  const randomColor = colors[Math.floor(Math.random() * colors.length)];
+  const guild = interaction.guild;
+  const textChannels = guild.channels.cache
+    .filter(channel => channel.isTextBased())
+    .map(channel => ({
+      label: channel.name,
+      value: channel.id,
+      default: ghostChannels.has(channel.id)
+    }));
 
-  const embed = new EmbedBuilder()
-    .setColor(randomColor)
+    const colors = ['#FF69B4', '#FF4500', '#1E90FF', '#32CD32', '#FFD700'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+  
+    const embed = new EmbedBuilder()
+      .setColor(randomColor)
     .setTitle('👻 Ghost Ping Channel Configuration')
-    .setDescription('Configure channels where new members will be ghost pinged automatically.')
+    .setDescription('Select the channels where new members will be ghost pinged automatically.')
     .addFields(
       { 
-        name: 'Current Channel', 
-        value: `<#${interaction.channelId}>` 
-      },
-      {
-        name: 'Status',
-        value: ghostChannels.has(interaction.channelId) ? '✅ Enabled' : '❌ Disabled'
+        name: 'Currently Configured Channels', 
+        value: ghostChannels.size > 0 
+          ? Array.from(ghostChannels).map(id => `<#${id}>`).join('\n')
+          : 'No channels configured'
       }
-    )
-    .setFooter({ text: 'Use the buttons below to enable or disable ghost pings in this channel' });
+    );
 
   const row = new ActionRowBuilder()
     .addComponents(
-      new ButtonBuilder()
-        .setCustomId('add_channel')
-        .setLabel('Enable')
-        .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setCustomId('remove_channel')
-        .setLabel('Disable')
-        .setStyle(ButtonStyle.Danger)
+      new StringSelectMenuBuilder()
+        .setCustomId('ghost_channels')
+        .setPlaceholder('Select channels for ghost pings')
+        .setMinValues(0)
+        .setMaxValues(textChannels.length)
+        .addOptions(textChannels)
     );
 
-  await interaction.reply({ 
+  const response = await interaction.reply({
     embeds: [embed],
     components: [row],
-    ephemeral: true 
+    ephemeral: true
   });
+
+  try {
+    const collector = response.createMessageComponentCollector({ 
+      componentType: ComponentType.StringSelect,
+      time: 60000 
+    });
+
+    collector.on('collect', async i => {
+      if (i.user.id === interaction.user.id) {
+        ghostChannels.clear();
+        i.values.forEach(channelId => ghostChannels.add(channelId));
+        const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+
+        const embed = new EmbedBuilder()
+          .setColor(`#${randomColor}`)
+          .setTitle('👻 Ghost Ping Channel Configuration')
+          .setDescription('Configuration updated successfully!')
+          .addFields(
+            {
+              name: 'Selected Channels',
+              value: i.values.length > 0 
+                ? i.values.map(id => `<#${id}>`).join('\n')
+                : 'No channels selected'
+            }
+          );
+
+        await i.update({ 
+          embeds: [updatedEmbed],
+          components: [] 
+        });
+      }
+    });
+
+    collector.on('end', async (collected, reason) => {
+      if (reason === 'time') {
+        await interaction.editReply({
+          content: 'Channel selection timed out.',
+          components: []
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error in channel selection:', error);
+    await interaction.editReply({
+      content: 'An error occurred while configuring channels.',
+      components: []
+    });
+  }
 }

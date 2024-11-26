@@ -1,6 +1,7 @@
-import { Client, Events, GatewayIntentBits, PermissionFlagsBits } from 'discord.js';
-import { executeGhostPing } from './commands/ghostPing.js';
+import { Client, Events, GatewayIntentBits, ActivityType } from 'discord.js';
 import { executeSetChannel } from './commands/setChannel.js';
+import { executeHelp } from './commands/help.js';
+import { executePing } from './commands/ping.js';
 
 export class Bot {
   constructor(config) {
@@ -30,8 +31,22 @@ export class Bot {
     this.client.on(Events.ClientReady, () => {
       console.log('✅ Bot is ready!');
       console.log(`📡 Connected as ${this.client.user.tag}`);
-      console.log('💭 Use /setchannel to configure the ghost ping channels (Admin only)');
-      this.reconnectAttempts = 0;
+      console.log('💭 Use /help to see available commands');
+
+        //bot's status | Comment or remove this line to disable the status or edit it
+        const statusMessage = 'V1.1.0';
+        this.client.user.setActivity(statusMessage, { type: ActivityType.Watching });
+    });
+
+    this.client.on(Events.GuildCreate, async (guild) => {
+      const owner = await guild.fetchOwner();
+      console.log('\n🚨 Bot joined a new server.');
+      console.log('📋 Server Details:');
+      console.log(`   • Name: ${guild.name}`);
+      console.log(`   • ID: ${guild.id}`);
+      console.log(`   • Owner: ${owner.user.tag}`);
+      console.log(`   • Member Count: ${guild.memberCount}`);
+      console.log('------------------------------------------');
     });
 
     this.client.on(Events.GuildMemberAdd, async (member) => {
@@ -51,42 +66,18 @@ export class Bot {
     });
 
     this.client.on(Events.InteractionCreate, async interaction => {
-      if (interaction.isButton()) {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-          await interaction.reply({ 
-            content: '❌ You need Administrator permissions to use these buttons!',
-            ephemeral: true 
-          });
-          return;
-        }
-
-        const [action, channelId] = interaction.customId.split(':');
-        
-        if (action === 'add_channel') {
-          this.ghostChannels.add(interaction.channelId);
-          await interaction.reply({ 
-            content: '✅ Channel added to ghost ping list!',
-            ephemeral: true 
-          });
-        } else if (action === 'remove_channel') {
-          this.ghostChannels.delete(interaction.channelId);
-          await interaction.reply({ 
-            content: '✅ Channel removed from ghost ping list!',
-            ephemeral: true 
-          });
-        }
-        return;
-      }
-
       if (!interaction.isChatInputCommand()) return;
 
       try {
         switch (interaction.commandName) {
-          case 'ghostping':
-            await executeGhostPing(interaction, this.ghostChannels);
-            break;
           case 'setchannel':
             await executeSetChannel(interaction, this.ghostChannels);
+            break;
+          case 'help':
+            await executeHelp(interaction);
+            break;
+          case 'ping':
+            await executePing(interaction);
             break;
         }
       } catch (error) {
@@ -159,7 +150,8 @@ export class Bot {
     console.error('1. Check your internet connection');
     console.error('2. Verify your Discord bot token in the .env file');
     console.error('3. Ensure the bot has the required permissions');
-    console.error('4. Check Discord API status: https://discordstatus.com\n');
+    console.error('4. Check that you have activated the 3 Intents');
+    console.error('5. Check Discord API status: https://discordstatus.com\n');
     process.exit(1);
   }
 }

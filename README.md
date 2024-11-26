@@ -1,4 +1,4 @@
-# 🤖Ghost Ping Bot
+# 🤖Ghost Ping Bot *V1.1.0*
 
 This bot is designed to automatically mention a user in a specific channel when they join the server. This helps notify members of the arrival of a new user and welcome them.
 

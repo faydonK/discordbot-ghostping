@@ -1,11 +1,13 @@
 import { REST, Routes } from 'discord.js';
 import { config } from './config.js';
-import { ghostPingCommand } from './commands/ghostPing.js';
 import { setChannelCommand } from './commands/setChannel.js';
+import { helpCommand } from './commands/help.js';
+import { pingCommand } from './commands/ping.js';
 
 const commands = [
-  ghostPingCommand.toJSON(),
-  setChannelCommand.toJSON()
+  setChannelCommand.toJSON(),
+  helpCommand.toJSON(),
+  pingCommand.toJSON()
 ];
 
 const rest = new REST().setToken(config.token);
