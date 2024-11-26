@@ -75,3 +75,4 @@ Thanks to my girlfriend for encouraging me to finish this project.
 <img src="https://faydonk.fr/media/img/pfp-github.png" alt="GitHub Profile Picture" width="150">
 
 *Made with ❤ by faydonK*
+
