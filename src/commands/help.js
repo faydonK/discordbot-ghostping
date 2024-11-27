@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
 
 export const helpCommand = new SlashCommandBuilder()
   .setName('help')
@@ -28,7 +28,16 @@ export async function executeHelp(interaction) {
     )
     .setFooter({ text: 'Ghost Ping Bot by faydonK - V1.1.0' });
 
+  const button = new ButtonBuilder()
+    .setLabel('📎 Ghost Ping Bot')
+    .setStyle(ButtonStyle.Link)
+    .setURL('https://github.com/faydonK/discordbot-ghostping');
+
+  const row = new ActionRowBuilder()
+    .addComponents(button);
+
   await interaction.reply({ 
-    embeds: [embed],  
+    embeds: [embed],
+    components: [row] // Corrected the property name to lowercase 'components'
   });
 }
