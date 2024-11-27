@@ -6,7 +6,7 @@ export const pingCommand = new SlashCommandBuilder()
 
   export async function executePing(interaction) {
     await interaction.reply({ 
-      content: `Ping: ${interaction.client.ws.ping}ms`
+      content: `Ping: **${interaction.client.ws.ping}ms**`
     });
   }
 

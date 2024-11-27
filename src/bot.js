@@ -42,10 +42,10 @@ export class Bot {
       const owner = await guild.fetchOwner();
       console.log('\n🚨 Bot joined a new server.');
       console.log('📋 Server Details:');
-      console.log(`   • Name: ${guild.name}`);
-      console.log(`   • ID: ${guild.id}`);
-      console.log(`   • Owner: ${owner.user.tag}`);
-      console.log(`   • Member Count: ${guild.memberCount}`);
+      console.log(`   • 📖 Name: ${guild.name}`);
+      console.log(`   • 💳 ID: ${guild.id}`);
+      console.log(`   • 👑 Owner: ${owner.user.tag}`);
+      console.log(`   • 👥 Member Count: ${guild.memberCount}`);
       console.log('------------------------------------------');
     });
 
