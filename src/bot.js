@@ -34,7 +34,7 @@ export class Bot {
       console.log('💭 Use /help to see available commands');
 
         //bot's status | Comment or remove this line to disable the status or edit it
-        const statusMessage = 'V1.1.0';
+        const statusMessage = 'V1.1.1';
         this.client.user.setActivity(statusMessage, { type: ActivityType.Watching });
     });
 
