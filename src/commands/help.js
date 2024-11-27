@@ -2,7 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRo
 
 export const helpCommand = new SlashCommandBuilder()
   .setName('help')
-  .setDescription('Shows information about the ghost ping bot');
+  .setDescription('❓・Shows information about the ghost ping bot');
 
 export async function executeHelp(interaction) {
   const colors = ['#FF69B4', '#FF4500', '#1E90FF', '#32CD32', '#FFD700'];
