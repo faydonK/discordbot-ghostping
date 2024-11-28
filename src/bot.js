@@ -2,6 +2,7 @@ import { Client, Events, GatewayIntentBits, ActivityType } from 'discord.js';
 import { executeSetChannel } from './commands/setChannel.js';
 import { executeHelp } from './commands/help.js';
 import { executePing } from './commands/ping.js';
+import { protectionManager } from './utils/protect.js';
 
 export class Bot {
   constructor(config) {
@@ -20,6 +21,7 @@ export class Bot {
 
   async start() {
     try {
+      this.ghostChannels = await loadChannels(); 
       this.setupEventHandlers();
       await this.connect();
     } catch (error) {
@@ -32,9 +34,9 @@ export class Bot {
       console.log('✅ Bot is ready!');
       console.log(`📡 Connected as ${this.client.user.tag}`);
       console.log('💭 Use /help to see available commands');
-
-        //bot's status | Comment or remove this line to disable the status or edit it
-        const statusMessage = 'V1.1.1';
+        
+      //bot's status | Comment or remove this line to disable the status or edit it
+        const statusMessage = 'V1.2.0';
         this.client.user.setActivity(statusMessage, { type: ActivityType.Watching });
     });
 
@@ -51,7 +53,7 @@ export class Bot {
 
     this.client.on(Events.GuildMemberAdd, async (member) => {
       if (this.ghostChannels.size === 0) return;
-      
+
       for (const channelId of this.ghostChannels) {
         const channel = member.guild.channels.cache.get(channelId);
         if (channel) {
@@ -67,6 +69,27 @@ export class Bot {
 
     this.client.on(Events.InteractionCreate, async interaction => {
       if (!interaction.isChatInputCommand()) return;
+
+      // Command log
+      console.log(`\n📝 Command Executed: /${interaction.commandName} | ${interaction.user.tag} | #${interaction.channel.name} | ${interaction.guild.name}`);
+
+  
+      const protectionStatus = protectionManager.isProtected();
+      if (protectionStatus.protected) {
+        await interaction.reply({
+          content: `⚠️ Protection mode is active. Please wait ${protectionStatus.remainingTime} seconds.`,
+          ephemeral: true
+        });
+        return;
+      }
+
+      if (protectionManager.logCommand(interaction.user.id)) {
+        await interaction.reply({
+          content: '⚠️ Spam detected! Protection mode activated for 1 minute.',
+          ephemeral: true
+        });
+        return;
+      }
 
       try {
         switch (interaction.commandName) {
@@ -86,7 +109,7 @@ export class Bot {
           content: 'There was an error executing this command!',
           ephemeral: true
         };
-        
+
         if (interaction.deferred || interaction.replied) {
           await interaction.editReply(reply);
         } else {
@@ -132,7 +155,7 @@ export class Bot {
 
     this.reconnectAttempts++;
     console.log(`🔄 Attempting to reconnect... (${this.reconnectAttempts}/${this.config.maxReconnectAttempts})`);
-    
+
     setTimeout(() => {
       if (!this.isShuttingDown) {
         this.connect().catch(error => {
@@ -150,8 +173,7 @@ export class Bot {
     console.error('1. Check your internet connection');
     console.error('2. Verify your Discord bot token in the .env file');
     console.error('3. Ensure the bot has the required permissions');
-    console.error('4. Check that you have activated the 3 Intents');
-    console.error('5. Check Discord API status: https://discordstatus.com\n');
+    console.error('4. Check Discord API status: https://discordstatus.com\n');
     process.exit(1);
   }
 }

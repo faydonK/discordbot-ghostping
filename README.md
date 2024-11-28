@@ -6,7 +6,9 @@ This bot is designed to automatically mention a user in a specific channel when 
 
 -   **`/setchannel`**  
     Set the current channel as the ghost ping channel.
-    
+-   **`/ping`**  
+    Check if the bot is responsive.
+
 
 ----------
 
