@@ -3,6 +3,8 @@ import { executeSetChannel } from './commands/setChannel.js';
 import { executeHelp } from './commands/help.js';
 import { executePing } from './commands/ping.js';
 import { protectionManager } from './utils/protect.js';
+import { loadChannels } from './utils/setChannelConfig.js';
+
 
 export class Bot {
   constructor(config) {
