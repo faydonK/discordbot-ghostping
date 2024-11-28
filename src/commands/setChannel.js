@@ -5,7 +5,7 @@ import {
   ButtonStyle,
   ActionRowBuilder
 } from 'discord.js';
-import { createConfigEmbed, handleChannelAdd, handleChannelRemove } from '../utils/setChannelConfig.js';
+import { createConfigEmbed, handleChannelAdd, handleChannelRemove, saveChannels } from '../utils/setChannelConfig.js';
 
 export const setChannelCommand = new SlashCommandBuilder()
   .setName('setchannel')
@@ -63,10 +63,14 @@ export async function executeSetChannel(interaction, ghostChannels) {
 
   collector.on('end', async () => {
     try {
-      await message.edit({
-        components: [],
-        embeds: [createConfigEmbed(ghostChannels)]
-      });
+      // Vérifiez si le message existe toujours avant de le modifier
+      const fetchedMessage = await message.channel.messages.fetch(message.id);
+      if (fetchedMessage) {
+        await message.edit({
+          components: [],
+          embeds: [createConfigEmbed(ghostChannels)]
+        });
+      }
     } catch (error) {
       console.error('Error updating message after collector end:', error);
     }
