@@ -1,6 +1,11 @@
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+config();
 
 function validateConfig() {
   const required = {
@@ -8,26 +13,25 @@ function validateConfig() {
     CLIENT_ID: 'Application client ID'
   };
 
-  for (const [key, name] of Object.entries(required)) {
-    if (!process.env[key]) {
-      throw new Error(
-        `${name} not found! Please add to .env file:\n${key}=your_${key.toLowerCase()}_here`
-      );
-    }
+  const missing = [];
 
-    if (process.env[key] === `your_${key.toLowerCase()}_here`) {
-      throw new Error(
-        `Please replace the default ${name.toLowerCase()} in .env with your actual value`
-      );
+  for (const [key, desc] of Object.entries(required)) {
+    if (!process.env[key]) {
+      missing.push(`${key}=${desc}`);
     }
+  }
+
+  if (missing.length > 0) {
+    throw new Error(
+      'Bot token not found! Please add to .env file:\n' +
+      missing.join('\n')
+    );
   }
 }
 
 validateConfig();
 
-export const config = {
+export default {
   token: process.env.DISCORD_TOKEN,
-  clientId: process.env.CLIENT_ID,
-  reconnectDelay: 5000,
-  maxReconnectAttempts: 5
+  clientId: process.env.CLIENT_ID
 };

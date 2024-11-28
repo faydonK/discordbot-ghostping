@@ -135,22 +135,26 @@ async function handleChannelAdd(interaction, ghostChannels, configMessage, userI
 
   collector.on('collect', async message => {
     try {
+      // Attendre que le message soit complètement chargé
       await message.fetch();
-      const channel = message.mentions.channels.first();
-      await message.delete().catch(console.error);
       
+      // Get channel from mentions BEFORE deleting the message
+      const channel = message.mentions.channels.first();
+
+      // Delete message AFTER processing
+      await message.delete().catch(console.error);
+
       if (!channel) {
         await interaction.followUp({
-          content: '❌ Channel not found. Make sure to mention a valid channel (e.g., #general).',
+          content: '❌ Channel not found. Make sure to mention a channel using #',
           ephemeral: true
         });
         return;
       }
 
-      const validation = validateChannel(channel);
-      if (!validation.isValid) {
+      if (ghostChannels.has(channel.id)) {
         await interaction.followUp({
-          content: validation.error,
+          content: '❌ This channel is already configured.',
           ephemeral: true
         });
         return;
@@ -158,6 +162,7 @@ async function handleChannelAdd(interaction, ghostChannels, configMessage, userI
 
       ghostChannels.add(channel.id);
       await saveChannels(ghostChannels);
+      
       await configMessage.edit({
         embeds: [createConfigEmbed(ghostChannels)]
       });

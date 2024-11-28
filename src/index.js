@@ -1,5 +1,5 @@
 import { Bot } from './bot.js';
-import { config } from './config.js';
+import config from './config.js';
 
 console.log('🤖 Starting Discord Ghost Ping Bot...');
 
