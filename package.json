@@ -1,7 +1,7 @@
 {
   "name": "discord-ghost-ping-bot",
   "autor": "faydonK",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": false,
   "type": "module",
   "main": "src/index.js",

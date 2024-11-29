@@ -5,6 +5,9 @@ import { executePing } from './commands/ping.js';
 import { protectionManager } from './utils/protect.js';
 import { loadChannels } from './utils/setChannelConfig.js';
 
+const DELETION_DELAY = 1000;
+const PING_DELAY = 2000;
+const RATE_LIMIT = 5000;
 
 export class Bot {
   constructor(config) {
@@ -19,6 +22,7 @@ export class Bot {
     this.reconnectAttempts = 0;
     this.isShuttingDown = false;
     this.ghostChannels = new Set();
+    this.lastPingTimes = new Map(); 
   }
 
   async start() {
@@ -54,20 +58,24 @@ export class Bot {
     });
 
     this.client.on(Events.GuildMemberAdd, async (member) => {
-      if (this.ghostChannels.size === 0) return;
+      try {
+        await new Promise(resolve => setTimeout(resolve, PING_DELAY));
 
-      for (const channelId of this.ghostChannels) {
-        const channel = member.guild.channels.cache.get(channelId);
-        if (channel) {
-          try {
-            const message = await channel.send(`<@${member.id}>`);
-            await new Promise(resolve => setTimeout(resolve, 700));
-            await message.delete();
-            await new Promise(resolve => setTimeout(resolve, 700));
-          } catch (error) {
-            console.error(`Failed to ghost ping in channel ${channelId}:`, error);
-          }
+        for (const channelId of this.ghostChannels) {
+          const channel = member.guild.channels.cache.get(channelId);
+          
+          if (!this.canPingInChannel(channel)) continue;
+          
+          if (this.isRateLimited(channelId)) continue;
+
+          const message = await channel.send(`<@${member.id}>`);
+          this.lastPingTimes.set(channelId, Date.now());
+          
+          await new Promise(resolve => setTimeout(resolve, DELETION_DELAY));
+          await message.delete().catch(console.error);
         }
+      } catch (error) {
+        console.error('Erreur lors du ping:', error);
       }
     });
 
@@ -131,6 +139,24 @@ export class Bot {
       console.log('🔌 Bot disconnected from Discord');
       this.handleReconnect();
     });
+  }
+
+  canPingInChannel(channel) {
+    return channel && 
+           channel.viewable && 
+           channel.permissionsFor(this.client.user).has(['SendMessages', 'ManageMessages']);
+  }
+
+  isRateLimited(channelId) {
+    const lastPing = this.lastPingTimes.get(channelId);
+    return lastPing && (Date.now() - lastPing < RATE_LIMIT);
+  }
+
+  async removeGhostChannel(channelId, message) {
+    await new Promise(resolve => setTimeout(resolve, DELETION_DELAY));
+    await message.delete().catch(console.error);
+    
+    this.ghostChannels.delete(channelId);
   }
 
   async connect() {
