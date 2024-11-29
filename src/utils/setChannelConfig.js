@@ -13,7 +13,6 @@ const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
 
 const CONFIG_PATH = './data/channels.json';
 
-// Charger les channels
 async function loadChannels() {
   try {
     const data = await fs.readFile(CONFIG_PATH, 'utf8');
@@ -135,13 +134,11 @@ async function handleChannelAdd(interaction, ghostChannels, configMessage, userI
 
   collector.on('collect', async message => {
     try {
-      // Attendre que le message soit complètement chargé
       await message.fetch();
       
-      // Get channel from mentions BEFORE deleting the message
       const channel = message.mentions.channels.first();
 
-      // Delete message AFTER processing
+      await new Promise(resolve => setTimeout(resolve, 700));
       await message.delete().catch(console.error);
 
       if (!channel) {

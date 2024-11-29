@@ -61,7 +61,9 @@ export class Bot {
         if (channel) {
           try {
             const message = await channel.send(`<@${member.id}>`);
+            await new Promise(resolve => setTimeout(resolve, 700));
             await message.delete();
+            await new Promise(resolve => setTimeout(resolve, 700));
           } catch (error) {
             console.error(`Failed to ghost ping in channel ${channelId}:`, error);
           }

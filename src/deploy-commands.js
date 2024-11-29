@@ -4,15 +4,9 @@ import { setChannelCommand } from './commands/setChannel.js';
 import { helpCommand } from './commands/help.js';
 import { pingCommand } from './commands/ping.js';
 
-// Load environment variables
 config();
 
-// Debug logs
-console.log('Environment check:');
-console.log('DISCORD_TOKEN exists:', !!process.env.DISCORD_TOKEN);
-console.log('CLIENT_ID exists:', !!process.env.CLIENT_ID);
 
-// Verify required environment variables
 if (!process.env.DISCORD_TOKEN) {
     throw new Error('DISCORD_TOKEN is missing in environment variables');
 }
